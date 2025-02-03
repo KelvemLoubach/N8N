@@ -1,11 +1,8 @@
 FROM n8nio/n8n:latest
 
-ENV DB_TYPE=postgresdb
-ENV DB_POSTGRESDB_HOST=aws-0-us-west-1.pooler.supabase.com
-ENV DB_POSTGRESDB_DATABASE=postgres
-ENV DB_POSTGRESDB_USER=postgres.dmrwcefxoehqezehgekd
-ENV DB_POSTGRESDB_PASSWORD=anapolis21
-
+# Exponha a porta padrão do n8n
 EXPOSE 5678
 
+# Inicia o n8n
 CMD ["n8n", "start"]
+
