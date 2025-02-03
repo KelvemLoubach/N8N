@@ -1,0 +1,404 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9
+            },
+            {
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        220,
+        0
+      ],
+      "id": "b8cff67c-90f6-4e38-bfb5-fc11a8df890f",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://newsapi.org/v2/everything?q=bitcoin&apiKey=8812fed8b9ab4c4483a7749df166f16d",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        0
+      ],
+      "id": "103a3afc-c277-4e33-abd8-36507d3f7d97",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    json: {\n      resumo: $input.first().json.data.markdown\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1480,
+        0
+      ],
+      "id": "2f3a8571-c0bc-45ff-8459-24b48d31adbd",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "chatId": "=7157751035",
+        "text": "={{ $json.mensagem }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2680,
+        -20
+      ],
+      "id": "1697b5dc-60c4-4f49-8225-74e8672d53bc",
+      "name": "Telegram",
+      "credentials": {
+        "telegramApi": {
+          "id": "x2dx5uqVddiYPxDV",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "resuma o texto abaixo, adicionando um titulo uma breve descrição e um resumo bem conciso do texto. Sempre em português e com um tom sensacionalista ",
+              "role": "system"
+            },
+            {
+              "content": "={{ $('HTTP Request1').item.json.data.markdown }}"
+            }
+          ]
+        },
+        "simplify": false,
+        "jsonOutput": "={{ true }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        1760,
+        -140
+      ],
+      "id": "3c7a5606-b98b-4ae5-882c-12d155e10ed4",
+      "name": "OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "wmTqb8aMaLRR4r7e",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        2100,
+        -20
+      ],
+      "id": "b227882e-fedd-4ac0-abc4-9569de4fe421",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\n// Obtém os dados de ambos os inputs do Merge\nconst input1 = $input.first().json.choices[0].message.content.titulo\nconst input2 = $input.first().json.choices[0].message.content.descricao\nconst input3 = $input.first().json.choices[0].message.content.resumo\n// Concatena os dados em uma única string formatada\nconst mensagemFinal = `${input1}\\n\\n ${input2}\\n\\n${input3} `;\n\n// Retorna o novo objeto JSON formatado\nreturn [{ json: { mensagem: mensagemFinal } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2400,
+        -20
+      ],
+      "id": "bb8b53be-6feb-4df3-baae-b4d9d3dc7b5e",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.firecrawl.dev/v1/scrape",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer fc-9f406560bcda4f448b4a351206dab073"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"url\": \"{{ $json.url }}\",\n  \"formats\": [\n    \"markdown\"\n  ]\n} ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1140,
+        -80
+      ],
+      "id": "0d2e1b20-a035-4a57-b509-9ff2914c114e",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM posts \n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        660,
+        0
+      ],
+      "id": "e7c11095-7bbd-46fa-af5d-6a86e04f9fed",
+      "name": "Postgres",
+      "credentials": {
+        "postgres": {
+          "id": "Hcyc8YwnZRTaBw6o",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const noticias = $('HTTP Request').first().json.articles;  // Array com as 98 notícias retornadas pelo HTTP Request\n  const noticiasPublicadas = $input.all().map(item => item.json.title) // Títulos já publicados\n\n\nlet noticiaSelecionada = null;\n\nfor (let i = 0; i < noticias.length; i++) {\n    if (!noticiasPublicadas.includes(noticias[i].title)) {\n        noticiaSelecionada = noticias[i];\n        break; // Para o loop assim que encontrar uma notícia nova\n    }\n}\n\nif (!noticiaSelecionada) {\n    return [{ json: { message: \"Nenhuma notícia inédita encontrada\" } }];\n}\n\n// Retorna a primeira notícia inédita encontrada\n\n\nreturn [{ json: noticiaSelecionada}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        0
+      ],
+      "id": "5c2f3b58-8cf1-4e01-b51f-c31492f59d81",
+      "name": "Code2"
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "posts",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ Math.floor(Math.random() * 90000000) + 10000000; }} \n",
+            "title": "={{ $json.title }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        1120,
+        120
+      ],
+      "id": "ee497516-b6d8-4140-bb99-7e511766b6b0",
+      "name": "Postgres1",
+      "credentials": {
+        "postgres": {
+          "id": "Hcyc8YwnZRTaBw6o",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Postgres",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram": {
+      "main": [
+        []
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres": {
+      "main": [
+        [
+          {
+            "node": "Code2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code2": {
+      "main": [
+        [
+          {
+            "node": "Postgres1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres1": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "3433d877-037f-4355-a244-347f1ebc1321",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "eb3204028ee93429c79872a0fbc4fc0c4c8505249a22d8a061bf3ca2b0d0c0b4"
+  },
+  "id": "jsF36d5I7BMDHAYE",
+  "tags": []
+}
