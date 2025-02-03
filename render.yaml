@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: n8n
+    env: docker
+    repo: https://github.com/KelvemLoubach/N8N
+    region: oregon
+    plan: free
+    rootDir: /
+    envVars:
+      - key: N8N_BASIC_AUTH_ACTIVE
+        value: "true"
+      - key: N8N_BASIC_AUTH_USER
+        value: "Kelvem"
+      - key: N8N_BASIC_AUTH_PASSWORD
+        value: "Anapolis21"
+      - key: DB_TYPE
+        value: "postgresdb"
+      - key: DB_POSTGRESDB_HOST
+        value: "aws-0-us-west-1.pooler.supabase.com"
+      - key: DB_POSTGRESDB_DATABASE
+        value: "postgres"
+      - key: DB_POSTGRESDB_USER
+        value: "postgres.dmrwcefxoehqezehgekd"
+      - key: DB_POSTGRESDB_PASSWORD
+        value: "anapolis21"
